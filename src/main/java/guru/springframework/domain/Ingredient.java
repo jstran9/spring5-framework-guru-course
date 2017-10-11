@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @EqualsAndHashCode(exclude = "recipe")
+@NoArgsConstructor
 // this has a many to one relationship with the recipe
 public class Ingredient {
 
