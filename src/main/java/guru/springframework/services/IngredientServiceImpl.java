@@ -113,6 +113,30 @@ public class IngredientServiceImpl implements IngredientService {
             return ingredientToIngredientCommand.convert(savedIngredientOptional.get());
             // the above doesn't check if the ingredient is available, it merely attempts to grab it and will throw an exception if it is not present.
         }
+    }
 
+    @Override
+    public void deleteById(Long recipeId, Long ingredientId) {
+        log.debug("deleting ingredient with the id of: " + ingredientId + " in the recipe with the id of: " + recipeId);
+        Optional<Recipe> recipeOptional = recipeRepository.findById(recipeId);
+        // make sure the recipe exists.
+        if(!recipeOptional.isPresent()) {
+            log.debug("error retrieving the recipe with id of: " + recipeId);
+        }
+        else {
+            Recipe recipe = recipeOptional.get();
+            Optional<Ingredient> ingredientOptional = recipe.getIngredients()
+                    .stream()
+                    .filter(ingredient -> ingredient.getId().equals(ingredientId))
+                    .findFirst();
+
+            if(ingredientOptional.isPresent()) {
+                Ingredient ingredientToDelete = ingredientOptional.get();
+                // this must be unlinked from the recipe to tell hibernate to delete it from the db.
+                ingredientToDelete.setRecipe(null);
+                recipe.getIngredients().remove(ingredientToDelete);
+                recipeRepository.save(recipe);
+            }
+        }
     }
 }
